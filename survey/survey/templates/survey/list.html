@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Survey List</title>
+</head>
+<body>
+    <h1>Surveys</h1>
+    <ul>
+        {% for survey in surveys %}
+            <li>{{ survey.title }}</li>
+        {% empty %}
+            <li>No surveys available.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

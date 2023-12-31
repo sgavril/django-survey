@@ -6,6 +6,7 @@ from django.db import models
 
 class Survey(models.Model):
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
 
 class Question(models.Model):
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
