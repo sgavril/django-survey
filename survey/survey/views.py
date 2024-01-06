@@ -1,9 +1,31 @@
 """
 Views for the survey app.
 """
+from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.shortcuts import render
+
+from .forms import CreateSurveyForm
 from .models import Survey
+
+def landing_page(request):
+    return render(request, 'survey/landing_page.html')
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'survey/register.html', {'form': form})
+
+
 
 def get_surveys(request):
     """
@@ -17,7 +39,17 @@ def get_survey_by_id(request):
     pass
 
 def create_survey(request):
-    pass
+    if request.method == 'POST':
+        form = CreateSurveyForm(request.POST)
+        if form.is_valid():
+            survey_obj = form.save()
+            # return render(request, 'survey/survey_created.html')
+            return redirect('survey_detail', survey_id=survey_obj.id)
+        else:
+            form = CreateSurveyForm()
+
+    return render(request, 'survey/create_survey.html', {'form': form})
+
 
 def edit_survey(request):
     pass
