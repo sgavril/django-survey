@@ -1,9 +1,10 @@
 """
 Views for the survey app.
 """
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from .forms import CreateSurveyForm
 from .models import Survey
@@ -17,15 +18,13 @@ def register(request):
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password')
+            raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-            return redirect('home')
+            return redirect('survey-list')
     else:
         form = UserCreationForm()
     return render(request, 'survey/register.html', {'form': form})
-
-
 
 def get_surveys(request):
     """
