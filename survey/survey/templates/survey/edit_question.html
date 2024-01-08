@@ -11,5 +11,6 @@
         {{ form.as_p }}
         <button type="submit">Add option to question</button>
     </form>
+    <a href="{% url 'survey-detail' survey_id=question.survey.pk %}">Back to survey</a>
 </body>
 </html>

@@ -13,5 +13,6 @@
             <li>No options available.</li>
         {% endfor %}
     </ul>
+    <a href="{% url 'edit-question' question_id=question.pk %}">Back to question</a>
 </body>
 </html>
