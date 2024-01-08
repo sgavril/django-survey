@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ question.question }}</title>
+</head>
+<body>
+    <h1>Edit question</h1>
+    <p>{{ survey.title }}</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add option to question</button>
+    </form>
+</body>
+</html>

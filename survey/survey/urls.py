@@ -21,10 +21,15 @@ from survey import views
 
 urlpatterns = [
     path('', views.landing_page, name='landing_page'),
-    path('register', views.register, name='register'),
-    # path('login/', views.login, name='login'),
-    path('login/', LoginView.as_view(template_name='survey/login.html', next_page='survey-list'), name='login'),
     path('admin/', admin.site.urls),
-    # path('')
-    path('list/', views.get_surveys, name='survey-list')
+    path('register', views.register, name='register'),
+    path('login/', LoginView.as_view(template_name='survey/login.html', next_page='survey-list'), name='login'),
+    # Surveys
+    path('list/', views.get_surveys, name='survey-list'),
+    path('create-survey/', views.create_survey, name='create-survey'),
+    path('survey/<int:survey_id>/', views.survey_detail, name='survey-detail'),
+    path('edit-survey/<int:survey_id>/', views.edit_survey, name='edit-survey'),
+    # Questions
+    path('question/<int:question_id>/', views.question_detail, name='question-detail'),
+    path('edit-question/<int:question_id>/', views.edit_question, name='edit-question'),
 ]

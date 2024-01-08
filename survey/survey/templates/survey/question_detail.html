@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> {{ question.title }}</title>
+</head>
+<body>
+    <h1>{{ question.title }}</h1>
+    <h2>Options:</h2>
+    <ul>
+        {% for option in question.option_set.all %}
+            <li>{{ option.option }}</li>
+        {% empty %}
+            <li>No options available.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -5,9 +5,17 @@
 </head>
 <body>
     <h1>Surveys</h1>
+    {% if user.is_authenticated %}
+        <p>Hello user {{ user.username }}</p>
+        <a href="{% url 'create-survey' %}">Create a survey</a>
+    {% else %}
+        <p>Hello guest</p>
+    {% endif %}
     <ul>
         {% for survey in surveys %}
             <li>{{ survey.title }}</li>
+            <a href="{% url 'survey-detail' survey_id=survey.pk %}">View survey</a>
+            <a href="{% url 'edit-survey' survey_id=survey.pk %}">Edit survey</a>
         {% empty %}
             <li>No surveys available.</li>
         {% endfor %}

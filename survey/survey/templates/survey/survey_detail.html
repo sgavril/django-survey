@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> {{ survey.title }}</title>
+</head>
+<body>
+    <h1>{{ survey.title }}</h1>
+    <h2>Questions:</h2>
+    <ul>
+        {% for question in survey.question_set.all %}
+            <li>{{ question.question }}</li>
+            <a href="{% url 'edit-question' question_id=question.pk %}">Edit question</a>
+        {% empty %}
+            <li>No questions available.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
