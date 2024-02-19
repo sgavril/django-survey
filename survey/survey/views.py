@@ -5,11 +5,15 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Count
+from django.forms.formsets import formset_factory
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .forms import CreateSurveyForm, AddQuestionForm, AddOptionForm
-from .models import Survey, Question
+from .forms import CreateSurveyForm, AddQuestionForm, AddOptionForm, AnswerForm, BaseAnswerFormSet
+from .models import Survey, Question, Submission
+
+# temporary
+import json
 
 def landing_page(request):
     return render(request, 'survey/landing_page.html')
@@ -111,10 +115,62 @@ def start_survey(request, survey_id):
     survey = get_object_or_404(Survey, pk=survey_id)
     if request.method == 'POST':
         submission = Submission.objects.create(survey=survey)
-        return redirect("survey-submit", survey_pk=survey_id, sub_id=submission.pk)
+        return redirect("submit-survey", survey_pk=survey_id, sub_id=submission.pk)
     
-    return render(request, "survey/start.html", {"survey": survey})
+    return render(request, "survey/survey_start.html", {"survey": survey})
 
 def submit_survey(request, survey_id, submission_id):
-    """Submit a survey."""
-    pass
+    """Submit a survey. This is the implementation found at 
+        https://github.com/MattSegal/django-survey/blob/master/survey/views/survey.py
+    """
+    # Survey retrieval and validation
+    survey = get_object_or_404(Survey, pk=survey_id)
+    submission = Submission.objects.filter(survey=survey)
+    questions = survey.question_set.all()
+    options = [q.option_set.all() for q in questions]
+
+    # 2. Formset generation for questions
+    form_kwargs = {"empty_permitted": False, "options": options}
+    AnswerFormSet = formset_factory(AnswerForm,
+                                    extra=len(questions),
+                                    formset=BaseAnswerFormSet)
+    # 3. Process submitted answers
+    if request.method == "POST":
+        formset = AnswerFormSet(request.POST, form_kwargs=form_kwargs)
+        if formset.is_valid():
+            with transaction.atomic():
+                for form in formset:
+                    Answer.objects.create(
+                        option=form.cleaned_data["option"],
+                        submission_id=submission_id
+                    )
+                    submission.save()
+                return redirect("survey-thanks", pk=survey_id)
+        else:
+            formset = AnswerFormSet(form_kwargs=form_kwargs)
+
+        question_forms = zip(questions, formset)
+        return render(request, "survey/submit.html",
+                    {"survey": survey, "question_forms": question_forms, "formset": formset},
+                )
+
+    # Demonstrative purposes: convert dict to JSON and return
+    data = {'message': 'Debug Info',
+            'questions': [q.question for q in questions]}
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+    # Process submitted answers
+
+    # Render survey form
+    # for question in questions:
+    #     print(question)
+
+# def submit_survey_basic()
+
+# def submit_survey_refactored(request, survey_id, submission_id):
+#     # 1. Retrieve objects
+#     survey, submission = get_survey_and_submission(survey_id, submission_id)
+
+#     # 2. Initialize formset
+#     AnswerFormSet, form_kwargs = initialize_answer_formset(survey)
