@@ -32,4 +32,7 @@ urlpatterns = [
     # Questions
     path('question/<int:question_id>/', views.question_detail, name='question-detail'),
     path('edit-question/<int:question_id>/', views.edit_question, name='edit-question'),
+    path('start_survey/<int:survey_id>/', views.start_survey, name='start-survey'),
+    path('submit_survey/<int:survey_id>/<int:submission_id>', views.submit_survey, name='submit-survey'),
+    path('survey-thanks', views.thank_user, name='survey-thanks'),
 ]

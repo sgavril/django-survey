@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Survey Start</title>
+</head>
+<body>
+    <h1>{{ survey.title }}</h1>
+    <p>You have been invited to take this survey.</p>
+    <form method="post" action=""{% url 'start-survey' survey.id %}">
+        {% csrf_token %}
+        <button type="submit">Start survey</button>
+    </form>
+</body>
+</html>
