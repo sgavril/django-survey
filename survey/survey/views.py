@@ -2,7 +2,9 @@
 Views for the survey app.
 """
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -26,19 +28,26 @@ def register(request):
         form = UserCreationForm()
     return render(request, 'survey/register.html', {'form': form})
 
+@login_required
 def get_surveys(request):
     """
-    Retrieve and display a list of all Survey objects.
+    Logged in user can view all of their surveys.
     """
-    surveys = Survey.objects.all()
+    # TODO: display statistics of a survey
+    surveys = Survey.objects.filter(creator=request.user).annotate(num_submissions=Count('submission'))
     context = {'surveys': surveys}
+    print(context)
     return render(request, 'survey/list.html', context)
 
+@login_required
 def survey_detail(request, survey_id):
+    """View a survey."""
     survey = get_object_or_404(Survey, pk=survey_id)
     return render(request, 'survey/survey_detail.html', {'survey': survey})
 
+@login_required
 def create_survey(request):
+    """Logged in user can create new survey."""
     if request.method == 'POST':
         form = CreateSurveyForm(request.POST)
         if form.is_valid():
@@ -54,7 +63,18 @@ def create_survey(request):
 
     return render(request, 'survey/create_survey.html', {'form': form})
 
+@login_required
+def delete_survey(request):
+    """Logged in user can delete a survey."""
+    survey = get_object_or_404(Survey, pk=pk, creator=request.user)
+    if request.method == 'POST':
+        survey.delete()
+
+    return redirect("list")
+        
+@login_required
 def edit_survey(request, survey_id):
+    """Logged in user can add questions to a survey."""
     survey = get_object_or_404(Survey, pk=survey_id, creator=request.user)
     if request.method == 'POST':
         form = AddQuestionForm(request.POST)
@@ -85,3 +105,16 @@ def edit_question(request, question_id):
         form = AddOptionForm()
 
     return render(request, 'survey/edit_question.html', {'form': form, 'question': question})
+
+def start_survey(request, survey_id):
+    """Take a survey."""
+    survey = get_object_or_404(Survey, pk=survey_id)
+    if request.method == 'POST':
+        submission = Submission.objects.create(survey=survey)
+        return redirect("survey-submit", survey_pk=survey_id, sub_id=submission.pk)
+    
+    return render(request, "survey/start.html", {"survey": survey})
+
+def submit_survey(request, survey_id, submission_id):
+    """Submit a survey."""
+    pass
